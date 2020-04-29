@@ -8,7 +8,10 @@ const menuRouter = require('./routes/Menu')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const categoryRouter = require('./routes/Category')
+const userRouter = require('./routes/User')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
+const myKey = 'dina'
 require('dotenv').config()
 
 var app = express();
@@ -30,7 +33,18 @@ app.use('/public', express.static('public'))
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/menu', menuRouter)
+app.use('/menu', validation,menuRouter)
 app.use('/category', categoryRouter)
+app.use('/member', userRouter)
+
+function validation(req,res,next) {
+  jwt.verify(req.headers['login-token'], myKey, (err,decoded)=>{
+    if(err){res.json(err)}
+    else{
+      req.body.userId = decoded.id;
+      next()
+    }
+  })
+}
 
 module.exports = app;
